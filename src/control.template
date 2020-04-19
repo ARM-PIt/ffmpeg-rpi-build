@@ -1,0 +1,9 @@
+Package: ffmpeg
+Version: ${FFMPEG_VERSION}
+Section: base
+Priority: optional
+Architecture: armhf
+Depends: libgl1
+Maintainer: Your Name <you@email.com>
+Description: FFmpeg from scratch
+ FFmpeg built for pi4

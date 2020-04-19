@@ -1,0 +1,11 @@
+--- configure	2020-04-15 21:01:12.620715878 +0300
++++ configure-opengl-rpi	2020-04-15 21:12:28.016791364 +0300
+@@ -6434,7 +6434,7 @@
+ enabled opengl            && { check_lib opengl GL/glx.h glXGetProcAddress "-lGL" ||
+                                check_lib opengl windows.h wglGetProcAddress "-lopengl32 -lgdi32" ||
+                                check_lib opengl OpenGL/gl3.h glGetError "-Wl,-framework,OpenGL" ||
+-                               check_lib opengl ES2/gl.h glGetError "-isysroot=${sysroot} -Wl,-framework,OpenGLES" ||
++                               check_lib opengl GLES2/gl2.h glGetError "-isysroot=${sysroot} -Wl,-framework,OpenGLES" ||
+                                die "ERROR: opengl not found."
+                              }
+ enabled omx_rpi           && { test_code cc OMX_Core.h OMX_IndexConfigBrcmVideoRequestIFrame ||
