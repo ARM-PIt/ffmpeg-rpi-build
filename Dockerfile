@@ -28,7 +28,7 @@ RUN mkdir -p /usr/share/man/man1 && \
     autopoint \
     gettext \
     libffi-dev \
-    libsdl1.2-dev
+    libsdl2-dev
 
 ARG PREFIX=/usr/local
 ARG TMPDIR=/ffmpeg-libraries
@@ -442,6 +442,7 @@ RUN envsubst < /ffmpeg_"${FFMPEG_VERSION}"/DEBIAN/control.template > /ffmpeg_"${
 
 RUN cp -a "${PREFIX}"/bin/ffmpeg /ffmpeg_"${FFMPEG_VERSION}"/usr/local/bin/ && \
     cp -a "${PREFIX}"/bin/ffprobe /ffmpeg_"${FFMPEG_VERSION}"/usr/local/bin/ && \
+    cp -a "${PREFIX}"/bin/ffplay /ffmpeg_"${FFMPEG_VERSION}"/usr/local/bin/ && \
     dpkg-deb --build ffmpeg_"${FFMPEG_VERSION}" && \
     rm -rf ffmpeg_"${FFMPEG_VERSION}"
 
