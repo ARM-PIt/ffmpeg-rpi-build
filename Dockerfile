@@ -459,7 +459,6 @@ RUN cp -a "${PREFIX}"/bin/ffmpeg /ffmpeg_"${FFMPEG_DEB_VERSION}"/usr/local/bin/ 
     cp -a "${PREFIX}"/bin/ffprobe /ffmpeg_"${FFMPEG_DEB_VERSION}"/usr/local/bin/ && \
     #cp -a "${PREFIX}"/bin/ffplay /ffmpeg_"${FFMPEG_DEB_VERSION}"/usr/local/bin/ && \
     dpkg-deb --build ffmpeg_"${FFMPEG_DEB_VERSION}" && \
-    cp -a ffmpeg_"${FFMPEG_DEB_VERSION}".deb /artifact/ && \
     rm -rf ffmpeg_"${FFMPEG_DEB_VERSION}"
 
 CMD ["/bin/bash"]
