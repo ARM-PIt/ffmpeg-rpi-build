@@ -1,9 +1,9 @@
 Package: ffmpeg
-Version: ${FFMPEG_VERSION}
+Version: ${FFMPEG_DEB_VERSION}
 Section: base
 Priority: optional
 Architecture: armhf
-Depends: libgl1
+Depends:
 Maintainer: Your Name <you@email.com>
 Description: FFmpeg from scratch
- FFmpeg built for pi4
+ FFmpeg built for armv7l

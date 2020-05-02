@@ -27,15 +27,11 @@ RUN mkdir -p /usr/share/man/man1 && \
     meson \
     autopoint \
     gettext \
-    libffi-dev \
-    libsdl2-dev
+    libffi-dev
 
 ARG PREFIX=/usr/local
 ARG TMPDIR=/ffmpeg-libraries
-
-ARG FFMPEG_VERSION=4.2.2-1
-ARG FFMPEG_BRANCH=release/4.2
-ARG FFMPEG_COMMIT=d61cf1b1ebc2477749d7d7825a072400ed24af9f
+RUN mkdir "${TMPDIR}"
 
 ARG OPENCORE_AMR_VERSION=0.1.5
 ARG XVID_VERSION=1.3.4
@@ -45,14 +41,16 @@ ARG ZLIB_VERSION=1.2.11
 ARG GMP_VERSION=6.2.0
 ARG NETTLE_VERSION=3.5.1
 ARG GNUTLS_VERSION=3.6.13
-ARG FFMPEG_CACHE_KILL=changeme
+ARG X264_GIT_BRANCH=stable
+ARG RPI_FIRMWARE_GIT_BRANCH=4.19.97-v7l
 
-RUN mkdir "${TMPDIR}"
-
-RUN git clone --depth 1 https://github.com/raspberrypi/firmware.git "${TMPDIR}"/firmware && \
+RUN git clone -b "${RPI_FIRMWARE_GIT_BRANCH}" https://github.com/ARM-PIt/rpi-firmware-essentials.git "${TMPDIR}"/rpi-firmware-essentials && \ 
+    git clone --depth=1 https://github.com/raspberrypi/userland "${TMPDIR}"/userland && \
     mkdir /opt/vc && \
-    cp -a "${TMPDIR}"/firmware/hardfp/opt/vc/lib /opt/vc/ && \
-    cp -a "${TMPDIR}"/firmware/hardfp/opt/vc/include /opt/vc/ && \
+    mkdir /lib/modules && \
+    cp -a "${TMPDIR}"/rpi-firmware-essentials/hardfp/opt/* /opt/ && \
+    cp -a "${TMPDIR}"/rpi-firmware-essentials/modules/* /lib/modules/ && \ 
+    cp -a "${TMPDIR}"/userland/interface/* "${PREFIX}"/include/ && \
     echo "/opt/vc/lib" > /etc/ld.so.conf.d/00-vmcs.conf && \
     ldconfig
 
@@ -179,6 +177,7 @@ RUN git clone https://github.com/xiph/opus.git "${TMPDIR}"/opus && \
 
 RUN git clone https://code.videolan.org/videolan/x264.git "${TMPDIR}"/x264 && \
     cd "${TMPDIR}"/x264 && \
+    git checkout -b "${X264_GIT_BRANCH}" && \
     PKG_CONFIG_PATH="${PREFIX}"/lib/pkgconfig \
     ./configure --prefix="${PREFIX}" --enable-static --enable-pic --disable-cli && \
     make -j$(nproc) && \
@@ -362,16 +361,29 @@ RUN git clone https://github.com/felipec/libomxil-bellagio.git "${TMPDIR}"/libom
     make install && \
     ldconfig
 
-RUN git clone https://git.ffmpeg.org/ffmpeg.git "${TMPDIR}"/FFmpeg && \
-    echo "${FFMPEG_CACHE_KILL}" && \
-    cd "${TMPDIR}"/FFmpeg && \
-    git checkout -b "${FFMPEG_BRANCH}"
-    #git checkout "${FFMPEG_COMMIT}" && \
+ARG FFMPEG_DEB_VERSION=052020-1
+ARG FFMPEG_GIT_BRANCH=master
+ARG FFMPEG_GIT_TAG=n4.2.1
+ARG FFMPEG_GIT_COMMIT=a619787a9ca87e0c4566cf124d52d23974a440d9
+ARG FFMPEG_CACHE_KILL=1
+RUN git clone https://github.com/FFmpeg/FFmpeg.git "${TMPDIR}"/FFmpeg && \
+    #cd "${TMPDIR}"/FFmpeg && \
+    #git checkout -b "${FFMPEG_GIT_BRANCH}" && \
+    #git checkout "${FFMPEG_GIT_COMMIT}" && \
+    #git checkout tags/"${FFMPEG_GIT_TAG}" && \
+    echo "${FFMPEG_CACHE_KILL}"
 
 COPY patches/configure-opengl-rpi.patch "${TMPDIR}"/FFmpeg/
 RUN cd "${TMPDIR}"/FFmpeg && patch -f < configure-opengl-rpi.patch
 
-RUN cp -a /usr/lib/gcc/arm-linux-gnueabihf/8/libgomp.a "${PREFIX}"/lib/ && ldconfig
+## Use --enable-ffplay, but will require libsdl2-dev on target for working ffmpeg
+#RUN apt-get update && apt-get install -y libsdl2-dev
+
+## Use --enable-opengl, but will require libgles2-mesa-dev on target for working ffmpeg
+#RUN apt-get update && apt-get install -y libgles2-mesa-dev
+
+RUN cp -a /usr/lib/gcc/arm-linux-gnueabihf/8/libgomp.a "${PREFIX}"/lib/ && \
+    ldconfig
 
 RUN cd "${TMPDIR}"/FFmpeg && \
     export PREFIX="${PREFIX}" && \
@@ -391,8 +403,9 @@ RUN cd "${TMPDIR}"/FFmpeg && \
     --disable-doc \
     --disable-shared \
     --disable-libxcb \
+    --disable-opengl \
+    --disable-ffplay \
     --enable-gmp \
-    --enable-opengl \
     --enable-gpl \
     --enable-libaom \
     --enable-libass \
@@ -402,6 +415,7 @@ RUN cd "${TMPDIR}"/FFmpeg && \
     --enable-fontconfig \
     --enable-libkvazaar \
     --enable-libmp3lame \
+    --enable-libopencore-amrnb \
     --enable-libopencore-amrwb \
     --enable-libopus \
     --enable-libvorbis \
@@ -410,10 +424,10 @@ RUN cd "${TMPDIR}"/FFmpeg && \
     --enable-zlib \
     --enable-libx264 \
     --enable-libx265 \
+    --enable-neon \
     --enable-mmal \
     --enable-libv4l2 \
     --enable-v4l2-m2m \
-    --enable-neon \
     --enable-nonfree \
     --enable-omx \
     --enable-omx-rpi \
@@ -426,24 +440,26 @@ RUN cd "${TMPDIR}"/FFmpeg && \
     --enable-libtheora \
     --enable-libxvid \
     --enable-postproc \
-    --enable-ffplay \
     --enable-rpath && \
     make -j$(nproc) && \
     make install && \
     ldconfig
 
-RUN mkdir -p /ffmpeg_"${FFMPEG_VERSION}"/usr/local/bin && \
-    mkdir /ffmpeg_"${FFMPEG_VERSION}"/DEBIAN
+RUN mkdir -p /ffmpeg_"${FFMPEG_DEB_VERSION}"/usr/local/bin && \
+    mkdir -p /ffmpeg_"${FFMPEG_DEB_VERSION}"/usr/local/lib/pkgconfig && \
+    mkdir /ffmpeg_"${FFMPEG_DEB_VERSION}"/DEBIAN && \
+    mkdir /artifact
 
-COPY src/control.template /ffmpeg_"${FFMPEG_VERSION}"/DEBIAN/control.template
+COPY src/control.template /ffmpeg_"${FFMPEG_DEB_VERSION}"/DEBIAN/control.template
 
-RUN envsubst < /ffmpeg_"${FFMPEG_VERSION}"/DEBIAN/control.template > /ffmpeg_"${FFMPEG_VERSION}"/DEBIAN/control && \
-    rm /ffmpeg_"${FFMPEG_VERSION}"/DEBIAN/control.template
+RUN envsubst < /ffmpeg_"${FFMPEG_DEB_VERSION}"/DEBIAN/control.template > /ffmpeg_"${FFMPEG_DEB_VERSION}"/DEBIAN/control && \
+    rm /ffmpeg_"${FFMPEG_DEB_VERSION}"/DEBIAN/control.template
 
-RUN cp -a "${PREFIX}"/bin/ffmpeg /ffmpeg_"${FFMPEG_VERSION}"/usr/local/bin/ && \
-    cp -a "${PREFIX}"/bin/ffprobe /ffmpeg_"${FFMPEG_VERSION}"/usr/local/bin/ && \
-    cp -a "${PREFIX}"/bin/ffplay /ffmpeg_"${FFMPEG_VERSION}"/usr/local/bin/ && \
-    dpkg-deb --build ffmpeg_"${FFMPEG_VERSION}" && \
-    rm -rf ffmpeg_"${FFMPEG_VERSION}"
+RUN cp -a "${PREFIX}"/bin/ffmpeg /ffmpeg_"${FFMPEG_DEB_VERSION}"/usr/local/bin/ && \
+    cp -a "${PREFIX}"/bin/ffprobe /ffmpeg_"${FFMPEG_DEB_VERSION}"/usr/local/bin/ && \
+    #cp -a "${PREFIX}"/bin/ffplay /ffmpeg_"${FFMPEG_DEB_VERSION}"/usr/local/bin/ && \
+    dpkg-deb --build ffmpeg_"${FFMPEG_DEB_VERSION}" && \
+    cp -a ffmpeg_"${FFMPEG_DEB_VERSION}".deb /artifact/ && \
+    rm -rf ffmpeg_"${FFMPEG_DEB_VERSION}"
 
 CMD ["/bin/bash"]
