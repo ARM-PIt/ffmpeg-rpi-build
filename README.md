@@ -12,7 +12,7 @@ Docker build and run commands to create debian package and copy to local artifac
 docker build -t ARM-PIt/ffmpeg-build-armhf-pi4:latest .
 ```
 
-### run and copy to ~/artifact
+### run and copy deb to ./artifact
 
 ```
 docker run \
