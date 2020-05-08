@@ -6,7 +6,6 @@ RUN mkdir -p /usr/share/man/man1 && \
     apt-get update && \
     apt-get full-upgrade -y && \
     apt-get install -y \
-    curl \
     vim \
     autoconf \
     automake \
