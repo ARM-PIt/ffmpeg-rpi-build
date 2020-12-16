@@ -26,7 +26,8 @@ RUN mkdir -p /usr/share/man/man1 && \
     meson \
     autopoint \
     gettext \
-    libffi-dev
+    libffi-dev \
+    libudev-dev
 
 ARG PREFIX=/usr/local
 ARG TMPDIR=/ffmpeg-libraries
@@ -41,7 +42,7 @@ ARG GMP_VERSION=6.2.0
 ARG NETTLE_VERSION=3.5.1
 ARG GNUTLS_VERSION=3.6.13
 ARG X264_GIT_BRANCH=stable
-ARG RPI_FIRMWARE_GIT_BRANCH=4.19.97-v7l
+ARG RPI_FIRMWARE_GIT_BRANCH=5.4.79-v7l
 
 RUN git clone -b "${RPI_FIRMWARE_GIT_BRANCH}" https://github.com/ARM-PIt/rpi-firmware-essentials.git "${TMPDIR}"/rpi-firmware-essentials && \ 
     git clone --depth=1 https://github.com/raspberrypi/userland "${TMPDIR}"/userland && \
@@ -241,6 +242,20 @@ RUN mkdir "${TMPDIR}"/fontconfig && cd "${TMPDIR}"/fontconfig && \
     make install && \
     ldconfig
 
+RUN git clone --depth 1 https://github.com/harfbuzz/harfbuzz.git "${TMPDIR}"/harfbuzz && \
+    cd "${TMPDIR}"/harfbuzz && \
+    export PKG_CONFIG_PATH="${PREFIX}"/lib/pkgconfig && \
+    sh autogen.sh && \
+    FREETYPE_CFLAGS=-I"${PREFIX}"/include/freetype2 \
+    FREETYPE_LIBS="-L"${PREFIX}"/lib -lfreetype" \
+    FRIBIDI_CFLAGS=-I"${PREFIX}"/include/fribidi \
+    FRIBIDI_LIBS="-L"${PREFIX}"/lib -lfribidi" \
+    PKG_CONFIG_PATH="${PREFIX}"/lib/pkgconfig \
+    ./configure --prefix="${PREFIX}" --enable-static --disable-shared && \
+    make -j2 && \
+    make install && \
+    ldconfig
+
 RUN git clone https://github.com/libass/libass.git "${TMPDIR}"/libass && \
     cd "${TMPDIR}"/libass && \
     export PKG_CONFIG_PATH="${PREFIX}"/lib/pkgconfig && \
@@ -249,6 +264,8 @@ RUN git clone https://github.com/libass/libass.git "${TMPDIR}"/libass && \
     FREETYPE_LIBS="-L"${PREFIX}"/lib -lfreetype" \
     FRIBIDI_CFLAGS=-I"${PREFIX}"/include/fribidi \
     FRIBIDI_LIBS="-L"${PREFIX}"/lib -lfribidi" \
+    HARFBUZZ_CFLAGS=-I"${PREFIX}"/include/harfbuzz \
+    HARFBUZZ_LIBS="-L"${PREFIX}"/lib -lharfbuzz" \
     PKG_CONFIG_PATH="${PREFIX}"/lib/pkgconfig \
     ./configure --prefix="${PREFIX}" --enable-static --disable-shared && \
     make -j$(nproc) && \
@@ -360,7 +377,7 @@ RUN git clone https://github.com/felipec/libomxil-bellagio.git "${TMPDIR}"/libom
     make install && \
     ldconfig
 
-ARG FFMPEG_DEB_VERSION=052020-1
+ARG FFMPEG_DEB_VERSION=122020-1
 ARG FFMPEG_GIT_BRANCH=master
 ARG FFMPEG_GIT_TAG=n4.2.1
 ARG FFMPEG_GIT_COMMIT=a619787a9ca87e0c4566cf124d52d23974a440d9
@@ -387,13 +404,13 @@ RUN cp -a /usr/lib/gcc/arm-linux-gnueabihf/8/libgomp.a "${PREFIX}"/lib/ && \
 RUN cd "${TMPDIR}"/FFmpeg && \
     export PREFIX="${PREFIX}" && \
     PKG_CONFIG_PATH="${PREFIX}"/lib/pkgconfig:/opt/vc/lib/pkgconfig \
-    ./configure \ 
+    ./configure \
     --prefix="${PREFIX}" \
     --pkg-config-flags="--static" \
     --enable-static \
     --arch=armhf \
     --target-os=linux \
-    --extra-cflags="-I"${PREFIX}"/include -I"${PREFIX}"/include/bellagio -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux" \    
+    --extra-cflags="-I"${PREFIX}"/include -I"${PREFIX}"/include/bellagio -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux" \
     --extra-ldflags="-L"${PREFIX}"/lib -L"${PREFIX}"/lib/bellagio -L/opt/vc/lib" \
     --extra-libs='-lstdc++ -lpthread -lm -ldl -lz -lrt -lbrcmGLESv2 -lEGL -lbcm_host -lvcos -lvchiq_arm -lgomp' \
     --enable-debug \
