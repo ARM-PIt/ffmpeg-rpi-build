@@ -2,7 +2,7 @@ Package: ffmpeg
 Version: ${FFMPEG_DEB_VERSION}
 Section: base
 Priority: optional
-Architecture: aarch64
+Architecture: arm64
 Depends:
 Maintainer: Your Name <you@email.com>
 Description: FFmpeg from scratch
