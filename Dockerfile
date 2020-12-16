@@ -410,7 +410,7 @@ RUN cd "${TMPDIR}"/FFmpeg && \
     --enable-static \
     --arch=aarch64 \
     --target-os=linux \
-    --extra-cflags="-I"${PREFIX}"/include -I"${PREFIX}"/include/bellagio -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux" \
+    --extra-cflags="-mcpu=cortex-a72 -I"${PREFIX}"/include -I"${PREFIX}"/include/bellagio -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux" \
     --extra-ldflags="-L"${PREFIX}"/lib -L"${PREFIX}"/lib/bellagio -L/opt/vc/lib" \
     --extra-libs='-lstdc++ -lpthread -lm -ldl -lz -lrt -lbcm_host -lvcos -lvchiq_arm -lgomp' \
     --enable-debug \
