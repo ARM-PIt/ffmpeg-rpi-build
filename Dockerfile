@@ -22,6 +22,7 @@ RUN mkdir -p /usr/share/man/man1 && \
     perl \
     pkg-config \
     python \
+    ragel \
     yasm \
     meson \
     autopoint \
@@ -243,7 +244,6 @@ RUN mkdir "${TMPDIR}"/fontconfig && cd "${TMPDIR}"/fontconfig && \
     make install && \
     ldconfig
 
-RUN apt-get install -y ragel
 RUN git clone --depth 1 https://github.com/harfbuzz/harfbuzz.git "${TMPDIR}"/harfbuzz && \
     cd "${TMPDIR}"/harfbuzz && \
     export PKG_CONFIG_PATH="${PREFIX}"/lib/pkgconfig && \
@@ -417,7 +417,6 @@ RUN cd "${TMPDIR}"/FFmpeg && \
     --disable-stripping \
     --enable-runtime-cpudetect \
     --disable-doc \
-    --disable-default-pie \
     --disable-shared \
     --disable-libxcb \
     --disable-opengl \
