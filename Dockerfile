@@ -42,13 +42,13 @@ ARG GMP_VERSION=6.2.0
 ARG NETTLE_VERSION=3.5.1
 ARG GNUTLS_VERSION=3.6.13
 ARG X264_GIT_BRANCH=stable
-ARG RPI_FIRMWARE_GIT_BRANCH=5.4.79-v7l
+ARG RPI_FIRMWARE_GIT_BRANCH=5.4.79-v8-aarch64
 
 RUN git clone -b "${RPI_FIRMWARE_GIT_BRANCH}" https://github.com/ARM-PIt/rpi-firmware-essentials.git "${TMPDIR}"/rpi-firmware-essentials && \ 
     git clone --depth=1 https://github.com/raspberrypi/userland "${TMPDIR}"/userland && \
     mkdir /opt/vc && \
     mkdir /lib/modules && \
-    cp -a "${TMPDIR}"/rpi-firmware-essentials/hardfp/opt/* /opt/ && \
+    cp -a "${TMPDIR}"/rpi-firmware-essentials/opt/* /opt/ && \
     cp -a "${TMPDIR}"/rpi-firmware-essentials/modules/* /lib/modules/ && \ 
     cp -a "${TMPDIR}"/userland/interface/* "${PREFIX}"/include/ && \
     echo "/opt/vc/lib" > /etc/ld.so.conf.d/00-vmcs.conf && \
@@ -104,8 +104,8 @@ RUN git clone --depth 1 https://aomedia.googlesource.com/aom "${TMPDIR}"/aom && 
     mkdir "${TMPDIR}"/aom/aom_build && \
     export PKG_CONFIG_PATH="${PREFIX}"/lib/pkgconfig && \
     cd "${TMPDIR}"/aom/aom_build && \
-    cmake -G "Unix Makefiles" AOM_SRC -DENABLE_NASM=on -DPYTHON_EXECUTABLE="$(which python3)" -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_SHARED_LIBS=0 -DCMAKE_C_FLAGS="-mfpu=neon -mfloat-abi=hard" .. && \
-    sed -i 's/ENABLE_NEON:BOOL=ON/ENABLE_NEON:BOOL=OFF/' CMakeCache.txt && \
+    cmake -G "Unix Makefiles" AOM_SRC -DENABLE_NASM=on -DPYTHON_EXECUTABLE="$(which python3)" -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_SHARED_LIBS=0 .. && \
+    #sed -i 's/ENABLE_NEON:BOOL=ON/ENABLE_NEON:BOOL=OFF/' CMakeCache.txt && \
     make -j$(nproc) && \
     make install && \
     ldconfig
@@ -186,6 +186,7 @@ RUN git clone https://code.videolan.org/videolan/x264.git "${TMPDIR}"/x264 && \
 
 RUN git clone https://github.com/zlargon/lame.git "${TMPDIR}"/lame && \
     cd "${TMPDIR}"/lame && \
+    cp -a /usr/share/misc/config.guess ./ && \
     PKG_CONFIG_PATH="${PREFIX}"/lib/pkgconfig \
     ./configure --prefix="${PREFIX}" --enable-static --disable-shared && \
     make -j$(nproc) && \
@@ -242,6 +243,7 @@ RUN mkdir "${TMPDIR}"/fontconfig && cd "${TMPDIR}"/fontconfig && \
     make install && \
     ldconfig
 
+RUN apt-get install -y ragel
 RUN git clone --depth 1 https://github.com/harfbuzz/harfbuzz.git "${TMPDIR}"/harfbuzz && \
     cd "${TMPDIR}"/harfbuzz && \
     export PKG_CONFIG_PATH="${PREFIX}"/lib/pkgconfig && \
@@ -264,8 +266,6 @@ RUN git clone https://github.com/libass/libass.git "${TMPDIR}"/libass && \
     FREETYPE_LIBS="-L"${PREFIX}"/lib -lfreetype" \
     FRIBIDI_CFLAGS=-I"${PREFIX}"/include/fribidi \
     FRIBIDI_LIBS="-L"${PREFIX}"/lib -lfribidi" \
-    HARFBUZZ_CFLAGS=-I"${PREFIX}"/include/harfbuzz \
-    HARFBUZZ_LIBS="-L"${PREFIX}"/lib -lharfbuzz" \
     PKG_CONFIG_PATH="${PREFIX}"/lib/pkgconfig \
     ./configure --prefix="${PREFIX}" --enable-static --disable-shared && \
     make -j$(nproc) && \
@@ -398,7 +398,7 @@ RUN cd "${TMPDIR}"/FFmpeg && patch -f < configure-opengl-rpi.patch
 ## Use --enable-opengl, but will require libgles2-mesa-dev on target for working ffmpeg
 #RUN apt-get update && apt-get install -y libgles2-mesa-dev
 
-RUN cp -a /usr/lib/gcc/arm-linux-gnueabihf/8/libgomp.a "${PREFIX}"/lib/ && \
+RUN cp -a /usr/lib/gcc/aarch64-linux-gnu/8/libgomp.a "${PREFIX}"/lib/ && \
     ldconfig
 
 RUN cd "${TMPDIR}"/FFmpeg && \
@@ -408,15 +408,16 @@ RUN cd "${TMPDIR}"/FFmpeg && \
     --prefix="${PREFIX}" \
     --pkg-config-flags="--static" \
     --enable-static \
-    --arch=armhf \
+    --arch=aarch64 \
     --target-os=linux \
     --extra-cflags="-I"${PREFIX}"/include -I"${PREFIX}"/include/bellagio -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux" \
     --extra-ldflags="-L"${PREFIX}"/lib -L"${PREFIX}"/lib/bellagio -L/opt/vc/lib" \
-    --extra-libs='-lstdc++ -lpthread -lm -ldl -lz -lrt -lbrcmGLESv2 -lEGL -lbcm_host -lvcos -lvchiq_arm -lgomp' \
+    --extra-libs='-lstdc++ -lpthread -lm -ldl -lz -lrt -lbcm_host -lvcos -lvchiq_arm -lgomp' \
     --enable-debug \
     --disable-stripping \
     --enable-runtime-cpudetect \
     --disable-doc \
+    --disable-default-pie \
     --disable-shared \
     --disable-libxcb \
     --disable-opengl \
@@ -441,7 +442,6 @@ RUN cd "${TMPDIR}"/FFmpeg && \
     --enable-libx264 \
     --enable-libx265 \
     --enable-neon \
-    --enable-mmal \
     --enable-libv4l2 \
     --enable-v4l2-m2m \
     --enable-nonfree \

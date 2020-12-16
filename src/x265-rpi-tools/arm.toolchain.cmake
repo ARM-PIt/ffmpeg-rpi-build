@@ -58,12 +58,12 @@ if(NOT DEFINED CMAKE_CXX_FLAGS)
   set(CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS} -fdata-sections -Wa,--noexecstack -fsigned-char -Wno-psabi")
   set(CMAKE_C_FLAGS             "${CMAKE_C_FLAGS} -fdata-sections -Wa,--noexecstack -fsigned-char -Wno-psabi")
   if(CMAKE_SYSTEM_PROCESSOR STREQUAL arm)
-    set(CMAKE_CXX_FLAGS           "-mthumb ${CMAKE_CXX_FLAGS}")
-    set(CMAKE_C_FLAGS             "-mthumb ${CMAKE_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS}") # -mthumb
+    set(CMAKE_C_FLAGS             "${CMAKE_C_FLAGS}") # -mthumb
     set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,nocopyreloc")
   endif()
   if(CMAKE_SYSTEM_PROCESSOR STREQUAL arm)
-    set(ARM_LINKER_FLAGS "-Wl,--fix-cortex-a8 -Wl,--no-undefined -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now")
+    set(ARM_LINKER_FLAGS "-Wl,--no-undefined -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now") # --fix-cortex-a8 -Wl
   elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL aarch64)
     set(ARM_LINKER_FLAGS "-Wl,--no-undefined -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now")
   endif()
