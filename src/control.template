@@ -2,8 +2,8 @@ Package: ffmpeg
 Version: ${FFMPEG_DEB_VERSION}
 Section: base
 Priority: optional
-Architecture: armhf
+Architecture: aarch64
 Depends:
 Maintainer: Your Name <you@email.com>
 Description: FFmpeg from scratch
- FFmpeg built for armv7l
+ FFmpeg built for armv8

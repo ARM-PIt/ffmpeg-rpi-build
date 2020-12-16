@@ -293,8 +293,9 @@ RUN mkdir "${TMPDIR}"/gmp && cd "${TMPDIR}"/gmp && \
 RUN mkdir "${TMPDIR}"/nettle && cd "${TMPDIR}"/nettle && \
     curl -sLO https://ftp.gnu.org/gnu/nettle/nettle-"${NETTLE_VERSION}".tar.gz && \
     tar -zx -f nettle-"${NETTLE_VERSION}".tar.gz && cd nettle-"${NETTLE_VERSION}" && \
+    sed -i -e 's/-fpic/-fPIC/g' ${TMPDIR}/nettle/nettle-"${NETTLE_VERSION}"/configure && \
     PKG_CONFIG_PATH="${PREFIX}"/lib/pkgconfig:${PKG_CONFIG_PATH} \
-    ./configure --prefix="${PREFIX}" --enable-static --disable-shared && \
+    ./configure --prefix="${PREFIX}" --enable-pic --enable-static --disable-shared && \
     make -j$(nproc) && \
     make install && \
     ldconfig
