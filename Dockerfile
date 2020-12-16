@@ -22,6 +22,7 @@ RUN mkdir -p /usr/share/man/man1 && \
     perl \
     pkg-config \
     python \
+    ragel \
     yasm \
     meson \
     autopoint \
