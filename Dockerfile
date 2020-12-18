@@ -6,13 +6,11 @@ ARG FFMPEG_DEB_VERSION=122020-1
 ARG FFMPEG_GIT_BRANCH=master
 ARG FFMPEG_GIT_TAG=n4.2.1
 ARG FFMPEG_GIT_COMMIT=a619787a9ca87e0c4566cf124d52d23974a440d9
-ARG FFMPEG_CACHE_KILL=1
-RUN git clone https://github.com/FFmpeg/FFmpeg.git "${TMPDIR}"/FFmpeg && \
+RUN git clone https://github.com/FFmpeg/FFmpeg.git "${TMPDIR}"/FFmpeg
     #cd "${TMPDIR}"/FFmpeg && \
     #git checkout -b "${FFMPEG_GIT_BRANCH}" && \
     #git checkout "${FFMPEG_GIT_COMMIT}" && \
     #git checkout tags/"${FFMPEG_GIT_TAG}" && \
-    echo "${FFMPEG_CACHE_KILL}"
 
 COPY patches/configure-opengl-rpi.patch "${TMPDIR}"/FFmpeg/
 COPY patches/ffmpeg-v4l2_m2m.patch "${TMPDIR}"/FFmpeg/libavcodec/
