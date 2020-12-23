@@ -1,12 +1,18 @@
 # ffmpeg-rpi-build
 
-Dockerized builder for ffmpeg to be used with Raspberry Pi 4 on armhf architecture in Debian 10 or Raspbian Buster. As is, the resulting deb package from 'docker build ...' provides a static ffmpeg binary under /usr/local/bin.
+Dockerized builder for ffmpeg to be used with Raspberry Pi 3/4 on armhf architecture in Debian Buster or Raspberry Pi OS.
 
 ## Usage
 
-Docker build and run commands to create debian package and copy to local artifact directory.
+The build process is broken up into two parts: One image to build the necessary static libraries ```ffmpeg-static-libraries```, and one to compile FFmpeg and build a .deb package using the static libraries image.
 
-### compile and build .deb package
+### compile and build image with static libraries
+
+```
+docker build -t armpit/ffmpeg-static-libraries:latest ffmpeg-static-libraries
+```
+
+### compile and build ffmpeg and .deb package
 
 ```
 docker build -t armpit/ffmpeg-rpi-build:latest .
