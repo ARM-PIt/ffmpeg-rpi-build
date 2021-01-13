@@ -1,4 +1,4 @@
-FROM armpit/ffmpeg-static-libraries
+FROM armpits/ffmpeg-static-libraries:armhf
 
 ARG PREFIX=/usr/local
 ARG TMPDIR=/ffmpeg-libraries

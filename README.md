@@ -9,13 +9,13 @@ The build process is broken up into two parts: One image to build the necessary 
 ### compile and build image with static libraries
 
 ```
-docker build -t armpit/ffmpeg-static-libraries:latest ffmpeg-static-libraries
+docker build -t armpits/ffmpeg-static-libraries:armhf ffmpeg-static-libraries
 ```
 
 ### compile and build ffmpeg and .deb package
 
 ```
-docker build -t armpit/ffmpeg-rpi-build:latest .
+docker build -t armpits/ffmpeg-rpi-build:armhf .
 ```
 
 ### run and copy deb to ./artifact
@@ -23,7 +23,7 @@ docker build -t armpit/ffmpeg-rpi-build:latest .
 ```
 docker run \
   -v "$(pwd)"/artifact:/artifact \
-  -it armpit/ffmpeg-rpi-build:latest \
+  -it armpits/ffmpeg-rpi-build:armhf \
   /bin/bash -c "/bin/cp /*.deb /artifact/"
 ```
 
