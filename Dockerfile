@@ -1,8 +1,8 @@
-FROM armpit/ffmpeg-static-libraries
+FROM armpits/ffmpeg-static-libraries:aarch64
 
 ARG PREFIX=/usr/local
 ARG TMPDIR=/ffmpeg-libraries
-ARG FFMPEG_DEB_VERSION=122020-1
+ARG FFMPEG_DEB_VERSION=012021-1
 ARG FFMPEG_GIT_BRANCH=master
 ARG FFMPEG_GIT_TAG=n4.2.1
 ARG FFMPEG_GIT_COMMIT=a619787a9ca87e0c4566cf124d52d23974a440d9
